@@ -1,17 +1,9 @@
-const fs = require('fs');
+const Logger = require('./log');
+const logger = new Logger();
 
-fs.readFile('./test.txt', 'utf-8', (error, data) => {
-    fs.mkdir('./files/', () => {
-        fs.writeFile('./files/test2.txt', `${data} \nНовый текст\n`, error => {
-            error ? console.log(error) : null;
-        });
-    });
+logger.on('some_event', args => {
+    const { id, text } = args;
+    console.log(id, text);
 });
 
-setTimeout(() => {
-    fs.unlink('./files/test2.txt', () => {});
-}, 4000);
-
-setTimeout(() => {
-    fs.rmdir('./files', () => {});
-}, 6000);
+logger.log('User logged!');
