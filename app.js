@@ -1,17 +1,20 @@
 const fs = require('fs');
+const zlib = require('zlib');
 
-fs.readFile('./test.txt', 'utf-8', (error, data) => {
-    fs.mkdir('./files/', () => {
-        fs.writeFile('./files/test2.txt', `${data} \nНовый текст\n`, error => {
-            error ? console.log(error) : null;
-        });
-    });
-});
+const readStream = fs.createReadStream('./docs/test.txt');
+const writeStream = fs.createWriteStream('./docs/newfile.txt');
+const compressStream = zlib.createGzip();
 
-setTimeout(() => {
-    fs.unlink('./files/test2.txt', () => {});
-}, 4000);
+// readStream.on('data', chunk => {
+//     writeStream.write('\n-----------------START CHUNK---------------------\n');
+//     writeStream.write(chunk);
+//     writeStream.write('\n-----------------END CHUNK---------------------\n');
+// });
 
-setTimeout(() => {
-    fs.rmdir('./files', () => {});
-}, 6000);
+const handleError = () => {
+    console.log('Error');
+    readStream.destroy();
+    writeStream.end('Finished with error...');
+};
+
+readStream.on('error', handleError).pipe(compressStream).pipe(writeStream).on('error', handleError);
