@@ -16,6 +16,8 @@ app.listen(PORT, error => {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 
+app.use(express.urlencoded({ extended: false }));
+
 app.use(express.static('styles'));
 
 app.get('/', (req, res) => {
@@ -35,12 +37,40 @@ app.get('/contacts', (req, res) => {
 
 app.get('/posts/:id', (req, res) => {
     const title = 'Post';
-    res.render(createPath('post'), { title });
+    const post = {
+        id: '1',
+        text: 'Однозначно, тщательные исследования конкурентов лишь добавляют фракционных разногласий и разоблачены. Приятно, граждане, наблюдать, как интерактивные прототипы являются только методом политического участия и призваны к ответу. Каждый из нас понимает очевидную вещь: существующая теория требует анализа приоретизации разума над эмоциями.',
+        title: 'Post title',
+        date: '2022-12-18',
+        author: 'fish-text.ru',
+    };
+    res.render(createPath('post'), { title, post });
 });
 
 app.get('/posts', (req, res) => {
     const title = 'Posts';
-    res.render(createPath('posts'), { title });
+    const posts = [
+        {
+            id: '1',
+            text: 'Однозначно, тщательные исследования конкурентов лишь добавляют фракционных разногласий и разоблачены. Приятно, граждане, наблюдать, как интерактивные прототипы являются только методом политического участия и призваны к ответу. Каждый из нас понимает очевидную вещь: существующая теория требует анализа приоретизации разума над эмоциями.',
+            title: 'Post title',
+            date: '2022-12-18',
+            author: 'fish-text.ru',
+        },
+    ];
+    res.render(createPath('posts'), { title, posts });
+});
+
+app.post('/add-post', (req, res) => {
+    const { title, author, text } = req.body;
+    const post = {
+        id: new Date(),
+        date: new Date().toLocaleDateString(),
+        title,
+        author,
+        text,
+    };
+    res.render(createPath('post'), { post, title });
 });
 
 app.get('/add-post', (req, res) => {
