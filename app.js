@@ -1,17 +1,50 @@
+const http = require('http');
 const fs = require('fs');
+const path = require('path');
+const { url } = require('inspector');
 
-fs.readFile('./test.txt', 'utf-8', (error, data) => {
-    fs.mkdir('./files/', () => {
-        fs.writeFile('./files/test2.txt', `${data} \nНовый текст\n`, error => {
-            error ? console.log(error) : null;
-        });
+const PORT = 3000;
+
+const server = http.createServer((req, res) => {
+    console.log('Server request', req.url);
+
+    res.setHeader('Content-Type', 'text/html');
+
+    const createPath = page => path.resolve(__dirname, 'views', `${page}.html`);
+
+    let basePath = '';
+    switch (req.url) {
+        case '/':
+        case '/home':
+        case '/home.html':
+            basePath = createPath('index');
+            res.statusCode = 200;
+            break;
+        case '/about-us':
+            res.statusCode = 301;
+            res.setHeader('Location', '/contacts');
+            res.end();
+            break;
+        case '/contacts':
+            basePath = createPath('contacts');
+            res.statusCode = 200;
+            break;
+        default:
+            basePath = createPath('error');
+            res.statusCode = 404;
+    }
+    fs.readFile(basePath, (err, data) => {
+        if (err) {
+            console.error(err);
+            res.statusCode = 500;
+            res.end();
+        } else {
+            res.write(data);
+            res.end();
+        }
     });
 });
 
-setTimeout(() => {
-    fs.unlink('./files/test2.txt', () => {});
-}, 4000);
-
-setTimeout(() => {
-    fs.rmdir('./files', () => {});
-}, 6000);
+server.listen(PORT, error => {
+    error ? console.log(error) : console.log(`Server running on port ${PORT}`);
+});
