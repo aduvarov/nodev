@@ -3,6 +3,7 @@ const path = require('path');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const Post = require('./models/post.js');
+const Contact = require('./models/contact');
 
 const app = express();
 
@@ -36,45 +37,40 @@ app.get('/', (req, res) => {
 
 app.get('/contacts', (req, res) => {
     const title = 'Contacts';
-    const contacts = [
-        { name: 'YouTube', link: 'http://youtube.com/YauhenKavalchuk' },
-        { name: 'Twitter', link: 'http://twitter.com/YauhenKavalchuk' },
-        { name: 'GitHub', link: 'http://github.com/YauhenKavalchuk' },
-    ];
-    res.render(createPath('contacts'), { contacts, title });
+    Contact.find()
+        .then(contacts => res.render(createPath('contacts'), { contacts, title }))
+        .catch(error => {
+            console.error(error);
+            res.render(createPath('error'), { title: 'Error' });
+        });
 });
 
 app.get('/posts/:id', (req, res) => {
     const title = 'Post';
-    const post = {
-        id: '1',
-        text: 'Однозначно, тщательные исследования конкурентов лишь добавляют фракционных разногласий и разоблачены. Приятно, граждане, наблюдать, как интерактивные прототипы являются только методом политического участия и призваны к ответу. Каждый из нас понимает очевидную вещь: существующая теория требует анализа приоретизации разума над эмоциями.',
-        title: 'Post title',
-        date: '2022-12-18',
-        author: 'fish-text.ru',
-    };
-    res.render(createPath('post'), { title, post });
+    Post.findById(req.params.id)
+        .then(post => res.render(createPath('post'), { title, post }))
+        .catch(error => {
+            console.error(error);
+            res.render(createPath('error'), { title: 'Error' });
+        });
 });
 
 app.get('/posts', (req, res) => {
     const title = 'Posts';
-    const posts = [
-        {
-            id: '1',
-            text: 'Однозначно, тщательные исследования конкурентов лишь добавляют фракционных разногласий и разоблачены. Приятно, граждане, наблюдать, как интерактивные прототипы являются только методом политического участия и призваны к ответу. Каждый из нас понимает очевидную вещь: существующая теория требует анализа приоретизации разума над эмоциями.',
-            title: 'Post title',
-            date: '2022-12-18',
-            author: 'fish-text.ru',
-        },
-    ];
-    res.render(createPath('posts'), { title, posts });
+    Post.find()
+        .sort({ createdAt: -1 })
+        .then(posts => res.render(createPath('posts'), { title, posts }))
+        .catch(error => {
+            console.error(error);
+            res.render(createPath('error'), { title: 'Error' });
+        });
 });
 
 app.post('/add-post', (req, res) => {
     const { title, author, text } = req.body;
     const post = new Post({ title, author, text });
     post.save()
-        .then(result => res.send(result))
+        .then(result => res.redirect('/posts'))
         .catch(error => {
             console.error(error);
             res.render(createPath('error'), { title: 'Error page' });
