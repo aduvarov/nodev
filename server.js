@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const config = require('./config.json');
 const methodOverride = require('method-override');
 const postRoutes = require('./routes/post-routes');
+const apiPostRoutes = require('./routes/api-post-routes');
 const contactRoutes = require('./routes/contact-routes');
 const createPath = require('./helpers/create-path');
 
@@ -38,7 +39,7 @@ app.get('/', (req, res) => {
 });
 
 app.use(postRoutes);
-
+app.use(apiPostRoutes);
 app.use(contactRoutes);
 
 app.use((req, res) => {
